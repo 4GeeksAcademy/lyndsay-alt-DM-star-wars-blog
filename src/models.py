@@ -12,11 +12,18 @@ class User(db.Model):
     password: Mapped[str] = mapped_column(nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
     favorites: Mapped[list["Favorites"]] = relationship(
-        "Favorites", back_populates="user", cascade="all, delete-orphan")
+        back_populates="user", cascade="all, delete-orphan")
+
+    def serialize(self):
+        return dict(
+            id=self.id,
+            email=self.email,
+        )
 
 
 class Favorites(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
+    user: Mapped["User"] = relationship(back_populates="favorites")
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     characters: Mapped[list["Character"]] = relationship(
         back_populates="favorites")
