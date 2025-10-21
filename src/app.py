@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Character, Planet, Vehicle
+from models import db, User, Character, Planet, Vehicle, Favorites
 from sqlalchemy import select
 # from models import Person
 
@@ -86,6 +86,22 @@ def get_vehicle():
             vehicle.serialize()
         )
     return jsonify(vehicle_dictionaries), 200
+
+
+@app.route("/favorite/planet/<int:planet_id>", methods=["POST"])
+def create_favorite_planet(planet_id):
+    user_id = request.json.get("user_id", None)
+    if user_id is None:
+        return jsonify({"message": "User ID is required to create favorite"}), 400
+    favorite = Favorites(
+        planet_id=planet_id,
+        user_id=user_id
+    )
+    db.session.add(favorite)
+    db.session.commit()
+    return jsonify(
+        favorite.serialize()
+    ), 201
 
 
 # this only runs if `$ python src/app.py` is executed
