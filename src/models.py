@@ -1,8 +1,27 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from abc import ABC
 db = SQLAlchemy()
+
+
+class BaseModel(db.Model):
+    __abstract__ = True
+
+    @classmethod
+    def create(cls, **kwargs):
+        instance = cls(**kwargs)
+        instance.save()
+        return instance
+
+    def save(self):
+        db.session.add(self)
+        try:
+            db.session.commit()
+            return self
+        except Exception as error:
+            db.session.rollback()
+            raise error
 
 
 class User(db.Model):
@@ -21,7 +40,7 @@ class User(db.Model):
         )
 
 
-class Favorites(db.Model):
+class Favorites(BaseModel):
     id: Mapped[int] = mapped_column(primary_key=True)
     user: Mapped["User"] = relationship(back_populates="favorites")
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)

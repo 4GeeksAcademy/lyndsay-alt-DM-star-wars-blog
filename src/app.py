@@ -93,12 +93,10 @@ def create_favorite_planet(planet_id):
     user_id = request.json.get("user_id", None)
     if user_id is None:
         return jsonify({"message": "User ID is required to create favorite"}), 400
-    favorite = Favorites(
+    favorite = Favorites.create(
         planet_id=planet_id,
         user_id=user_id
     )
-    db.session.add(favorite)
-    db.session.commit()
     return jsonify(
         favorite.serialize()
     ), 201
